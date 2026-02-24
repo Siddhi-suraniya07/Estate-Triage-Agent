@@ -1,6 +1,4 @@
-Here is a professional, polished version of your project documentation, suitable for GitHub repositories, portfolios, or technical presentations.
 
-***
 
 # 🏢 AI-Powered Real Estate Triage System
 ### Automated Tenant Support & Management Dashboard
