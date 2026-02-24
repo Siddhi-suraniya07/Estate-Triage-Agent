@@ -12,6 +12,42 @@ def get_db_connection():
         database=os.getenv('DB_NAME')
     )
 
+# --- CORRECTED INIT FUNCTION ---
+def init_db():
+    """Checks if database has new columns and adds them safely."""
+    print("🔄 Checking Database Structure...")
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # 1. Try Adding 'sentiment' column
+    try:
+        cursor.execute("ALTER TABLE support_tickets ADD COLUMN sentiment VARCHAR(20) DEFAULT 'Neutral'")
+        print("✅ Added 'sentiment' column.")
+    except mysql.connector.Error as err:
+        # Error 1060 means "Duplicate column name" (It already exists)
+        if err.errno == 1060:
+            pass # Column exists, do nothing
+        else:
+            print(f"⚠️ Warning checking sentiment: {err}")
+
+    # 2. Try Adding 'summary' column
+    try:
+        cursor.execute("ALTER TABLE support_tickets ADD COLUMN summary VARCHAR(255) DEFAULT 'No summary available'")
+        print("✅ Added 'summary' column.")
+    except mysql.connector.Error as err:
+        if err.errno == 1060:
+            pass # Column exists, do nothing
+        else:
+            print(f"⚠️ Warning checking summary: {err}")
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print("🚀 Database Ready.")
+
+# --- Existing Functions (Unchanged) ---
+
 def get_all_tickets():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -60,29 +96,13 @@ def save_draft_response(ticket_id, draft_text):
     conn.close()
 
 def save_entities(ticket_id, entities):
-    if not entities:
-        return
-
+    if not entities: return
     conn = get_db_connection()
     cursor = conn.cursor()
-    
-    query = "INSERT INTO extracted_entities (ticket_id, entity_type, entity_value) VALUES (%s, %s, %s)"
-    
-    try:
-        for entity in entities:
-            # Check if entity has correct keys
-            if 'type' in entity and 'value' in entity:
-                cursor.execute(query, (ticket_id, entity['type'], entity['value']))
-            else:
-                print(f"⚠️ Skipping invalid entity format: {entity}")
-        
-        conn.commit()
-        print(f"✅ Saved {len(entities)} entities for {ticket_id}")
-    except Exception as e:
-        print(f"❌ Database Error saving entities: {e}")
-    finally:
-        cursor.close()
-        conn.close()
+    for entity in entities:
+        cursor.execute("INSERT INTO extracted_entities (ticket_id, entity_type, entity_value) VALUES (%s, %s, %s)", (ticket_id, entity['type'], entity['value']))
+    conn.commit()
+    conn.close()
 
 def update_ticket_status(ticket_id, new_status):
     conn = get_db_connection()
@@ -91,24 +111,32 @@ def update_ticket_status(ticket_id, new_status):
     conn.commit()
     conn.close()
 
-# NEW: Get Statistics for Dashboard
 def get_dashboard_stats():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
-    stats = {}
+    # Initialize defaults in case DB is empty
+    stats = {'total': 0, 'open': 0, 'urgent': 0, 'maintenance': 0}
     
-    cursor.execute("SELECT COUNT(*) as total FROM support_tickets")
-    stats['total'] = cursor.fetchone()['total']
-    
-    cursor.execute("SELECT COUNT(*) as total FROM support_tickets WHERE status='open'")
-    stats['open'] = cursor.fetchone()['total']
-    
-    cursor.execute("SELECT COUNT(*) as total FROM support_tickets WHERE urgency='high' AND status='open'")
-    stats['urgent'] = cursor.fetchone()['total']
-    
-    cursor.execute("SELECT COUNT(*) as total FROM support_tickets WHERE category='maintenance_urgent'")
-    stats['maintenance'] = cursor.fetchone()['total']
-    
+    try:
+        cursor.execute("SELECT COUNT(*) as total FROM support_tickets")
+        res = cursor.fetchone()
+        if res: stats['total'] = res['total']
+        
+        cursor.execute("SELECT COUNT(*) as total FROM support_tickets WHERE status='open'")
+        res = cursor.fetchone()
+        if res: stats['open'] = res['total']
+        
+        cursor.execute("SELECT COUNT(*) as total FROM support_tickets WHERE urgency='high' AND status='open'")
+        res = cursor.fetchone()
+        if res: stats['urgent'] = res['total']
+        
+        cursor.execute("SELECT COUNT(*) as total FROM support_tickets WHERE category='maintenance_urgent'")
+        res = cursor.fetchone()
+        if res: stats['maintenance'] = res['total']
+        
+    except Exception as e:
+        print(f"Stats Error: {e}")
+        
     conn.close()
     return stats

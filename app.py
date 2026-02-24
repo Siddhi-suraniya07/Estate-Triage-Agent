@@ -1,11 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for
-from database.db import get_all_tickets, get_ticket_details, create_ticket, save_draft_response, save_entities, update_ticket_status, get_dashboard_stats
+# Added init_db to imports 👇
+from database.db import get_all_tickets, get_ticket_details, create_ticket, save_draft_response, save_entities, update_ticket_status, get_dashboard_stats, init_db
 from agents.classifier import classify_ticket
 from agents.ner import extract_entities
-from agents.extras import analyze_sentiment, generate_summary  # <--- NEW IMPORT
+from agents.extras import analyze_sentiment, generate_summary
 import random
 
 app = Flask(__name__)
+
+# --- RUN DB CHECK ON STARTUP ---
+with app.app_context():
+    print("🔄 Checking Database Structure...")
+    init_db()
+# -------------------------------
 
 @app.route('/')
 def dashboard():
