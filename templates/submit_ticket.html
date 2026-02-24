@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Submit Support Request</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { font-family: sans-serif; background: #eef2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .form-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #2980b9; }
+        label { font-weight: bold; font-size: 0.9em; color: #555; }
+    </style>
+</head>
+<body>
+
+<div class="form-card">
+    <h2 style="text-align: center; color: #2c3e50;">Maintenance & Support</h2>
+    <p style="text-align: center; color: #7f8c8d;">Describe your issue. Our AI will prioritize it.</p>
+    
+    <form action="/submit" method="POST">
+        <label>Name</label>
+        <input type="text" name="sender_name" placeholder="John Doe" required>
+        
+        <label>Unit Number</label>
+        <input type="text" name="unit_number" placeholder="e.g. 5B-101" required>
+
+        <label>Subject</label>
+        <input type="text" name="subject" placeholder="e.g. Leaking sink" required>
+
+        <label>Message</label>
+        <textarea name="message" rows="5" placeholder="Describe the problem..." required></textarea>
+
+        <button type="submit">Submit Ticket</button>
+    </form>
+    <br>
+    <div style="text-align: center;">
+        <a href="/" style="color: #999; text-decoration: none;">&larr; Back to Dashboard</a>
+    </div>
+</div>
+
+</body>
+</html>

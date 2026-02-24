@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Real Estate Triage Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        /* Header with Button */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f1f1; padding-bottom: 15px; }
+        h1 { margin: 0; color: #2c3e50; font-size: 1.8em; }
+        
+        /* The New Button */
+        .btn-new { 
+            background-color: #3498db; 
+            color: white; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            font-weight: bold; 
+            transition: background 0.3s;
+        }
+        .btn-new:hover { background-color: #2980b9; }
+
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #34495e; color: white; font-weight: 600; text-transform: uppercase; font-size: 0.85em; letter-spacing: 0.5px; }
+        tr:hover { background-color: #f9f9f9; }
+
+        /* Badges */
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75em; font-weight: bold; color: white; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; text-align: center; min-width: 60px; }
+        
+        .urgency-high { background-color: #e74c3c; }   /* Red */
+        .urgency-medium { background-color: #f39c12; } /* Orange */
+        .urgency-low { background-color: #27ae60; }    /* Green */
+        
+        .status-open { background-color: #3498db; }    /* Blue */
+        .status-resolved { background-color: #95a5a6; } /* Grey */
+        
+        .action-link { color: #3498db; font-weight: bold; text-decoration: none; }
+        .action-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🏢 Support Dashboard</h1>
+        <!-- THIS IS THE NEW BUTTON -->
+        <a href="/submit" class="btn-new">+ Submit New Ticket</a>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tenant</th>
+                <th>Subject</th>
+                <th>Category</th>
+                <th>Urgency</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in tickets %}
+            <tr>
+                <td><strong>{{ ticket.ticket_id }}</strong></td>
+                <td>
+                    <div style="font-weight: bold; color: #2c3e50;">{{ ticket.sender_name }}</div>
+                    <div style="font-size: 0.85em; color: #7f8c8d;">Unit: {{ ticket.unit_number }}</div>
+                </td>
+                <td>{{ ticket.subject }}</td>
+                <td>
+                    <span style="font-size: 0.9em; color: #555; background: #eee; padding: 4px 8px; border-radius: 4px;">
+                        {{ ticket.category|replace('_', ' ')|title }}
+                    </span>
+                </td>
+                
+                <td>
+                    <span class="badge urgency-{{ ticket.urgency }}">
+                        {{ ticket.urgency }}
+                    </span>
+                </td>
+                
+                <td>
+                    <span class="badge status-{{ ticket.status }}">
+                        {{ ticket.status }}
+                    </span>
+                </td>
+                <td>
+                    <a href="/ticket/{{ ticket.ticket_id }}" class="action-link">View &rarr;</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
