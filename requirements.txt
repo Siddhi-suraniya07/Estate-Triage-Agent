@@ -1,0 +1,7 @@
+flask
+langchain
+openai
+crewai
+python-dotenv
+mysql-connector-python
+langchain-groq
