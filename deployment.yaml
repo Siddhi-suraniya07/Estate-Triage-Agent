@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: real-estate-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: real-estate
+  template:
+    metadata:
+      labels:
+        app: real-estate
+    spec:
+      containers:
+      - name: real-estate-container
+        image: siddhi072/estate-agent
+        ports:
+        - containerPort: 5000
+        env:
+        - name: GROQ_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: groq-secret
+              key: GROQ_API_KEY
+        resources:
+          requests:
+            memory: "128Mi"   # 🔥 reduced
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
